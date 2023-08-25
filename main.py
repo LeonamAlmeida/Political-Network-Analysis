@@ -2,6 +2,7 @@ import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+import re
 
 Graph = nx.Graph()
 
@@ -96,6 +97,40 @@ def create_dict_colors():
             dict_colors[j] = colors[i]
     return dict_colors
 
+# Inverte a cor hexadecimal, para cores não ficar muito semelhante
+def invert_hex(content):
+    text = content.group(1).lower()
+    code = {}
+    l1="0123456789abcdef"
+    l2="fedcba9876543210"
+    for i in range(len(l1)):
+        code[l1[i]]=l2[i]
+    inverted = ""
+    for j in text:
+        inverted += code[j]
+    return '#{}'.format(inverted)
+
+# Associa uma cor aleatoria a cada partido, útil para coloração dos nós
+def create_dict_colors():
+    politicians_by_party = read_file_by_political_party(politicians_path, p_party)
+    values = list(politicians_by_party.values())
+    result = []
+    re_hex = re.compile("#([0-9a-f]{3,6})(\W)?", re.IGNORECASE)
+    for i in values: 
+        if i not in result: 
+            result.append(i)
+    colors = []
+    for i in range(len(result)):
+        if (i % 2 == 0):
+            colors.append("#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)]))
+        else:
+            colors.append(re_hex.sub(invert_hex, "#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)])))
+    dict_colors = {}
+    for i in range(len(result)):
+        for j in result[i]:
+            dict_colors[j] = colors[i]
+    return dict_colors
+
 def create_betwenness(Graph, year, p_party):
     
     betweenness_centrality = nx.betweenness_centrality(Graph)
@@ -114,6 +149,7 @@ def create_betwenness(Graph, year, p_party):
     if len(p_party) == 0:
         plt.savefig(f"betwenness_/betwenness_{year}_ALL.png")
     else:
+        p_party = p_party.replace(' ','_')
         plt.savefig(f"betwenness_/betwenness_{year}_{p_party}.png")
 
 # Criando heatmap em ordem alfabética, tanto de partido quanto deputado
@@ -150,10 +186,11 @@ def create_heatmap(Graph, year, p_party):
     if len(p_party) == 0:
         plt.savefig(f"heatmap_/heatmap_{year}_ALL.png")
     else:
+        p_party = p_party.replace(' ','_')
         plt.savefig(f"heatmap_/heatmap_{year}_{p_party}.png")
 
 def create_graph(Graph, year, p_party):
-    
+    random.seed(42)
     nodes_to_remove = [node for node in Graph.nodes() if Graph.degree(node) == 0]
 
     # Remover os nós com grau zero
@@ -163,14 +200,30 @@ def create_graph(Graph, year, p_party):
     # Conf. layout do grafo
     pos = nx.spring_layout(Graph)
 
-    fig, ax = plt.subplots(figsize=(25, 21))  # (largura, altura)
+    plt.subplots(figsize=(25, 21))  # (largura, altura)
+    
+    dict_colors = create_dict_colors()
+    colors = []
+    for node in Graph.nodes():
+        partido = ""
+        for i in node:
+            if (i == '('):
+                continue
+            elif (i == ')'):
+                break
+            else:
+                 partido += i
+        colors.append(dict_colors[partido])
+    
+    layout = nx.spring_layout(Graph, k=0.15)
     
     # Desenha o grafo
-    nx.draw(Graph, pos, with_labels=True, node_size=400, node_color="#DF31E4", font_size=10, font_color='black', font_weight='bold')
-
+    nx.draw(Graph, pos = layout, with_labels=True, node_size=400, node_color=colors, font_size=10, font_color='black', font_weight='bold')
+    
     if len(p_party) == 0:
         plt.savefig(f"graph_/graph_{year}_ALL.png")
     else:
+        p_party = p_party.replace(' ','_')
         plt.savefig(f"graph_/graph_{year}_{p_party}.png")
 
 if __name__ == '__main__':
@@ -190,6 +243,5 @@ if __name__ == '__main__':
     
     inversion_of_weights(Graph)
     
-    # create_betwenness(Graph, year, p_party)
-    # create_heatmap(Graph, year, p_party)
-    
+    create_betwenness(Graph, year, p_party)
+    create_heatmap(Graph, year, p_party)
