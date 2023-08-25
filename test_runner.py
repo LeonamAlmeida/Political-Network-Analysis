@@ -9,12 +9,12 @@ def run_test(year, p_party, threshold_idx):
     print(result.stdout)
     print(result.stderr)
 
-# Lista de combinações preestabelecidas de entradas
+# Caso for rodar todos os anos
 # for i in range(2002, 2023):
 #     test_cases = [
 #     (i, '', '0.9'),
 # ]
-   
+  
 test_cases = [
     ('2023', 'PSOL PT', '0.9'),
     ('2023', 'PT PL', '0.9'),

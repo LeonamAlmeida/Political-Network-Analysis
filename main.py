@@ -78,12 +78,6 @@ def inversion_of_weights(G):
     for u, v, data in G.edges(data=True):
         data['weight'] = 1 - data['weight']
 
-# vizualizar o grafo
-def write_graph_to_file(graph, file_path):
-    with open(file_path, 'w', encoding='utf-8') as file:
-        for u, v, data in graph.edges(data=True):
-            file.write(f"{u};{v};{data['weight']}\n")
-
 def create_betwenness(Graph, year, p_party):
     
     betweenness_centrality = nx.betweenness_centrality(Graph)
@@ -91,7 +85,7 @@ def create_betwenness(Graph, year, p_party):
     nodes, centralities = zip(*sorted(betweenness_centrality.items(), key=lambda item: item[1]))
     
     # Plotar o grafico de barras
-    plt.figure(figsize=(17, 15))
+    plt.figure(figsize=(25, 17))
     plt.bar(nodes, centralities)
     plt.xlabel("Deputados")
     plt.ylabel("Betweenness")
@@ -99,23 +93,31 @@ def create_betwenness(Graph, year, p_party):
     plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
     
-    # Salvando
-    plt.savefig(f"betwenness_/betwenness_{year}_{p_party}.png")
-    
+    if len(p_party) == 0:
+        plt.savefig(f"betwenness_/betwenness_{year}_ALL.png")
+    else:
+        plt.savefig(f"betwenness_/betwenness_{year}_{p_party}.png")
+
+# Criando heatmap em ordem alfabética, tanto de partido quanto deputado
 def create_heatmap(Graph, year, p_party):
-    # Chamando novamente (3 linhas abaixo) para que o threshold e inversão não afete o heatmap
+    # Chamando novamente (5 linhas abaixo) para que o threshold e inversão não afete o heatmap
+    graph_path = "datasets/graph" + year + ".txt"
+    politicians_path = "datasets/politicians" + year + ".txt"
     read_file(Graph, graph_path, read_file_by_political_party(politicians_path, p_party))
     print(Graph)
     normalize_graph(Graph, read_votes_data(politicians_path, p_party))
     
-    # Criar uma matriz de adjacência com os pesos das arestas
-    num_nodes = len(Graph.nodes())
-    adj_matrix = np.zeros((num_nodes, num_nodes))
+    my_edges = list(Graph.edges(data=True))
+    my_edges.sort()
+    
+    sorted_nodes = sorted(Graph.nodes())
 
+    num_nodes = len(sorted_nodes)
+    adj_matrix = np.zeros((num_nodes, num_nodes))
     # Preencher a matriz com os pesos das arestas do grafo
-    for u, v, data in Graph.edges(data=True):
-        u_idx = list(Graph.nodes()).index(u)
-        v_idx = list(Graph.nodes()).index(v)
+    for u, v, data in my_edges:
+        u_idx = sorted_nodes.index(u)
+        v_idx = sorted_nodes.index(v)
         adj_matrix[u_idx][v_idx] = data['weight']
         adj_matrix[v_idx][u_idx] = data['weight']  # A matriz é simétrica para grafos não direcionados
 
@@ -123,10 +125,14 @@ def create_heatmap(Graph, year, p_party):
     plt.figure(figsize=(25, 21))
     plt.imshow(adj_matrix, cmap='hot', origin='upper')
     plt.colorbar(label='Peso das Arestas')
-    plt.xticks(ticks=np.arange(num_nodes), labels=list(Graph.nodes()), rotation=45, ha = 'right')
-    plt.yticks(ticks=np.arange(num_nodes), labels=list(Graph.nodes()))
+    plt.xticks(ticks=np.arange(num_nodes), labels=sorted_nodes, rotation=45, ha = 'right')
+    plt.yticks(ticks=np.arange(num_nodes), labels=sorted_nodes)
     plt.tight_layout()
-    plt.savefig(f"heatmap_/heatmap_{year}_{p_party}.png")
+    
+    if len(p_party) == 0:
+        plt.savefig(f"heatmap_/heatmap_{year}_ALL.png")
+    else:
+        plt.savefig(f"heatmap_/heatmap_{year}_{p_party}.png")
 
 def create_graph(Graph, year, p_party):
     
@@ -140,11 +146,17 @@ def create_graph(Graph, year, p_party):
     pos = nx.spring_layout(Graph)
 
     fig, ax = plt.subplots(figsize=(25, 21))  # (largura, altura)
+    colors = []
+    for node in Graph.nodes():
+        colors.append("blue")
     
     # Desenha o grafo
-    nx.draw(Graph, pos, with_labels=True, node_size=400, node_color='skyblue', font_size=10, font_color='black', font_weight='bold')
+    nx.draw(Graph, pos, with_labels=True, node_size=400, node_color=colors, font_size=10, font_color='black', font_weight='bold')
 
-    plt.savefig(f"graph_/graph_{year}_{p_party}.png")
+    if len(p_party) == 0:
+        plt.savefig(f"graph_/graph_{year}_ALL.png")
+    else:
+        plt.savefig(f"graph_/graph_{year}_{p_party}.png")
 
 if __name__ == '__main__':
     year = input("Informe o ano a considerar ( de 2001 a 2023) : ")
@@ -157,12 +169,11 @@ if __name__ == '__main__':
     read_file(Graph, graph_path, read_file_by_political_party(politicians_path, p_party))
     print(Graph)
     normalize_graph(Graph, read_votes_data(politicians_path, p_party))
-    write_graph_to_file(Graph, "normalized_graph.txt")
     threshold(Graph, threshold_idx)
-    write_graph_to_file(Graph, "normalized_graph_threshold.txt")
+    
+    create_graph(Graph, year, p_party)
+    
     inversion_of_weights(Graph)
-    write_graph_to_file(Graph, "inverted_normalized_graph_threshold.txt")
     
     create_betwenness(Graph, year, p_party)
-    create_graph(Graph, year, p_party)
     create_heatmap(Graph, year, p_party)
