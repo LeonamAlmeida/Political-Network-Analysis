@@ -80,23 +80,6 @@ def inversion_of_weights(G):
     for u, v, data in G.edges(data=True):
         data['weight'] = 1 - data['weight']
 
-# Associa uma cor aleatoria a cada partido, útil para coloração dos nós
-def create_dict_colors():
-    politicians_by_party = read_file_by_political_party(politicians_path, p_party)
-    values = list(politicians_by_party.values())
-    result = []
-    for i in values: 
-        if i not in result: 
-            result.append(i)
-    colors = []
-    for i in range(len(result)):
-        colors.append("#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)]))
-    dict_colors = {}
-    for i in range(len(result)):
-        for j in result[i]:
-            dict_colors[j] = colors[i]
-    return dict_colors
-
 # Inverte a cor hexadecimal, para cores não ficar muito semelhante
 def invert_hex(content):
     text = content.group(1).lower()
