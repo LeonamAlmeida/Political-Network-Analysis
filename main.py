@@ -100,7 +100,7 @@ def create_dict_colors():
     result = []
     re_hex = re.compile("#([0-9a-f]{3,6})(\W)?", re.IGNORECASE)
     for i in values: 
-        if i not in result: 
+        if i not in result:
             result.append(i)
     colors = []
     for i in range(len(result)):
