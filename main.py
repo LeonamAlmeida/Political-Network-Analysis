@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 Graph = nx.Graph()
 
@@ -78,6 +79,23 @@ def inversion_of_weights(G):
     for u, v, data in G.edges(data=True):
         data['weight'] = 1 - data['weight']
 
+# Associa uma cor aleatoria a cada partido, útil para coloração dos nós
+def create_dict_colors():
+    politicians_by_party = read_file_by_political_party(politicians_path, p_party)
+    values = list(politicians_by_party.values())
+    result = []
+    for i in values: 
+        if i not in result: 
+            result.append(i)
+    colors = []
+    for i in range(len(result)):
+        colors.append("#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)]))
+    dict_colors = {}
+    for i in range(len(result)):
+        for j in result[i]:
+            dict_colors[j] = colors[i]
+    return dict_colors
+
 def create_betwenness(Graph, year, p_party):
     
     betweenness_centrality = nx.betweenness_centrality(Graph)
@@ -146,12 +164,9 @@ def create_graph(Graph, year, p_party):
     pos = nx.spring_layout(Graph)
 
     fig, ax = plt.subplots(figsize=(25, 21))  # (largura, altura)
-    colors = []
-    for node in Graph.nodes():
-        colors.append("blue")
     
     # Desenha o grafo
-    nx.draw(Graph, pos, with_labels=True, node_size=400, node_color=colors, font_size=10, font_color='black', font_weight='bold')
+    nx.draw(Graph, pos, with_labels=True, node_size=400, node_color="#DF31E4", font_size=10, font_color='black', font_weight='bold')
 
     if len(p_party) == 0:
         plt.savefig(f"graph_/graph_{year}_ALL.png")
@@ -175,5 +190,6 @@ if __name__ == '__main__':
     
     inversion_of_weights(Graph)
     
-    create_betwenness(Graph, year, p_party)
-    create_heatmap(Graph, year, p_party)
+    # create_betwenness(Graph, year, p_party)
+    # create_heatmap(Graph, year, p_party)
+    
