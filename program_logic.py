@@ -114,7 +114,7 @@ def create_dict_colors():
             dict_colors[j] = colors[i]
     return dict_colors
 
-def create_betwenness(Graph, year, p_party):
+def create_betwenness(Graph, year, p_party, threshold_idx):
     
     betweenness_centrality = nx.betweenness_centrality(Graph)
     
@@ -130,13 +130,13 @@ def create_betwenness(Graph, year, p_party):
     plt.tight_layout()
     
     if len(p_party) == 0:
-        plt.savefig(f"betwenness_/betwenness_{year}_ALL.png")
+        plt.savefig(f"betwenness_/betwenness_{year}_ALL_{threshold_idx}.png")
     else:
         p_party = p_party.replace(' ','_')
-        plt.savefig(f"betwenness_/betwenness_{year}_{p_party}.png")
+        plt.savefig(f"betwenness_/betwenness_{year}_{p_party}_{threshold_idx}.png")
 
 # Criando heatmap em ordem alfabética, tanto de partido quanto deputado
-def create_heatmap(Graph, year, p_party):
+def create_heatmap(Graph, year, p_party, threshold_idx):
     # Chamando novamente (5 linhas abaixo) para que o threshold e inversão não afete o heatmap
     graph_path = "datasets/graph" + year + ".txt"
     politicians_path = "datasets/politicians" + year + ".txt"
@@ -167,12 +167,12 @@ def create_heatmap(Graph, year, p_party):
     plt.tight_layout()
     
     if len(p_party) == 0:
-        plt.savefig(f"heatmap_/heatmap_{year}_ALL.png")
+        plt.savefig(f"heatmap_/heatmap_{year}_ALL_{threshold_idx}.png")
     else:
         p_party = p_party.replace(' ','_')
-        plt.savefig(f"heatmap_/heatmap_{year}_{p_party}.png")
+        plt.savefig(f"heatmap_/heatmap_{year}_{p_party}_{threshold_idx}.png")
 
-def create_graph(Graph, year, p_party):
+def create_graph(Graph, year, p_party, threshold_idx):
     random.seed(42)
     nodes_to_remove = [node for node in Graph.nodes() if Graph.degree(node) == 0]
 
@@ -204,10 +204,10 @@ def create_graph(Graph, year, p_party):
     nx.draw(Graph, pos = layout, with_labels=True, node_size=400, node_color=colors, font_size=10, font_color='black', font_weight='bold')
     
     if len(p_party) == 0:
-        plt.savefig(f"graph_/graph_{year}_ALL.png")
+        plt.savefig(f"graph_/graph_{year}_ALL_{threshold_idx}.png")
     else:
         p_party = p_party.replace(' ','_')
-        plt.savefig(f"graph_/graph_{year}_{p_party}.png")
+        plt.savefig(f"graph_/graph_{year}_{p_party}_{threshold_idx}.png")
 
 if __name__ == '__main__':
     year = input("Informe o ano a considerar ( de 2001 a 2023) : ")
@@ -222,9 +222,9 @@ if __name__ == '__main__':
     normalize_graph(Graph, read_votes_data(politicians_path, p_party))
     threshold(Graph, threshold_idx)
     
-    create_graph(Graph, year, p_party)
+    create_graph(Graph, year, p_party, threshold_idx)
     
     inversion_of_weights(Graph)
     
-    create_betwenness(Graph, year, p_party)
-    create_heatmap(Graph, year, p_party)
+    create_betwenness(Graph, year, p_party, threshold_idx)
+    create_heatmap(Graph, year, p_party, threshold_idx)
