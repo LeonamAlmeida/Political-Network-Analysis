@@ -1,0 +1,7 @@
+networkx
+numpy
+matplotlib
+scipy
+python-dotenv
+python-magic
+python-telegram-bot==13.15
