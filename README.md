@@ -40,13 +40,13 @@ Este projeto consiste em uma interface bot, desenvolvida como parte da disciplin
     
     - Certifique-se de instalar as dependências:
     ```bash
-        pip install -r requirements.txt
+    pip install -r requirements.txt
     ```
 2. **Rodando via terminal**:
     
     - Execute `program_logic.py` diretamente no terminal:
     ```bash
-        python program_logic.py
+    python program_logic.py
     ```
     - O programa solicitará os parâmetros: ano, partidos e threshold, e, em seguida, gerará os gráficos.
     - Obs: ao rodar via terminal, caso queira incluir todos os partidos, pressione _Enter_ quando solicitado.
@@ -54,7 +54,7 @@ Este projeto consiste em uma interface bot, desenvolvida como parte da disciplin
     
     - Substitua o token do bot no arquivo `telegram_bot.py` e execute:
     ```bash
-        python telegram_bot.py
+    python telegram_bot.py
     ```
     - Interaja com o bot no Telegram para gerar gráficos e visualizações diretamente no chat.
 
